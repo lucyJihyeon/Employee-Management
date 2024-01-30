@@ -7,7 +7,7 @@ USE employees_db;
 -- create a table called department
 CREATE TABLE department (
     -- id field is automatically generated
-    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id INT NOT NULL,
     name VARCHAR(30) NOT NULL
     -- id filed will be related to another table
     PRIMARY KEY (id)
@@ -28,8 +28,11 @@ CREATE TABLE employee (
     id INT NOT NULL,
     first_name VARCHAR(30),
     last_name VARCHAR(30),
-    manager_id INT NOT NULL,
+    manager_id INT,
     role_id INT,
     -- indicate that each field of the employee table belongs to the role table based on the role_id that is related to the id in the role table
-    FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE SET NULL
+    FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE SET NULL,
+    -- make the id field the primary key and correlated with the manager_id field 
+    PRIMARY KEY (id),
+    FOREIGN KEY (manager_id) REFERENCES employee(id) ON DELETE SET NULL
 )

@@ -8,7 +8,7 @@ USE employees_db;
 CREATE TABLE department (
     -- id field is automatically generated
     id INT NOT NULL,
-    name VARCHAR(30) NOT NULL
+    name VARCHAR(30) NOT NULL,
     -- id filed will be related to another table
     PRIMARY KEY (id)
 );
@@ -35,4 +35,4 @@ CREATE TABLE employee (
     -- make the id field the primary key and correlated with the manager_id field 
     PRIMARY KEY (id),
     FOREIGN KEY (manager_id) REFERENCES employee(id) ON DELETE SET NULL
-)
+);

@@ -1,5 +1,5 @@
 INSERT INTO department (id, name)
-VALUES  (001, "sales"),
+VALUES  (001, "Sales"),
         (002, "Enginerring"),
         (003, "Finance"),
         (004, "Legal");

@@ -28,6 +28,7 @@ const viewDepartments = async () => {
 
 //method to view all the roles 
 const viewRoles = async () => {
+  //joining the tables based on the primary key
   const query_VR = `SELECT r.id AS id, r.title, d.name AS department, r.salary
   FROM role AS r
   JOIN department AS d ON r.department_id = d.id`;
@@ -38,7 +39,25 @@ const viewRoles = async () => {
     console.error("Error detected: " , err);
     return [];
   };
-}
+};
+
+//method to view all the employees 
+const viewEmployees = async () => {
+  const query_VE = 
+  `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, " ", m.last_name) AS manager
+FROM employee AS e
+JOIN role AS r ON e.role_id = r.id 
+JOIN department AS d ON r.department_id = d.id
+LEFT JOIN employee AS m ON e.manager_id = m.id`;
+  try {
+    const [employees] = await db.promise().query(query_VE);
+    return [employees];
+  } catch (err) {
+    console.error("Error Detected: ", err);
+    return [];
+  };
+};
+
 //function to start prompting a user what action they want to take
 const promptUser = async () => {
   //store the answer from the user prompt
@@ -62,24 +81,12 @@ const promptUser = async () => {
   let query = "";
   //switch statement to display different database table based on the user action
   switch (answer.action) {
-    //when a user selects "View All Employees", update the query
-    //joining the tables based on the primary key
+    //when a user selects "View All Employees", call viewEmployees method 
     case "View All Employees":
-      query = `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, " ", m.last_name) AS manager
-FROM employee AS e
-JOIN role AS r ON e.role_id = r.id 
-JOIN department AS d ON r.department_id = d.id
-LEFT JOIN employee AS m ON e.manager_id = m.id`;
-      //execute the query and fetch the results
-      db.query(query, function (err, results) {
-        if (err) {
-          console.error("Error detected: ", err);
-        }
-        //display the results in a table format
-        console.table(results);
-      });
+      const employees = await viewEmployees();
+      console.table(employees[0]);
       break;
-    //when a user selects "View All Roles", update the query
+    //when a user selects "View All Roles", call viewroles method 
     case "View All Roles":
       const roles = await viewRoles();
       console.table(roles[0]);

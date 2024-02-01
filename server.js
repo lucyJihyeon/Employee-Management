@@ -12,6 +12,18 @@ const db = mysql.createConnection({
   database: "employees_db",
 });
 
+//function to update the query to view all the departments with its id
+const viewDepartments = async () => {
+  const query_VD = `SELECT * FROM department`;
+  try {
+    const [department] = await db.promise().query(query_VD);
+    //it returns all the records as objects
+    return [department];
+  } catch (err) {
+    console.error("Error Detected: ", err);
+    return [];
+  }
+};
 //function to start prompting a user what action they want to take
 const promptUser = async () => {
   //store the answer from the user prompt
@@ -52,38 +64,29 @@ LEFT JOIN employee AS m ON e.manager_id = m.id`;
         console.table(results);
       });
       break;
-    //when a user selects "View All Roles", update the query 
+    //when a user selects "View All Roles", update the query
     case "View All Roles":
       query = `SELECT r.id AS id, r.title, d.name AS department, r.salary
 FROM role AS r
 JOIN department AS d ON r.department_id = d.id`;
       //execute the query and fetch the results
       db.query(query, function (err, results) {
-        if (err)    {
-            console.error("Error detected: " ,err);
+        if (err) {
+          console.error("Error detected: ", err);
         }
         console.table(results);
       });
       break;
-      //when a user selects "View All Departments", update the query 
-      case "View All Departments":
-        query = `SELECT * FROM department`;
-        //execute the query and fetch the results
-        db.query(query, function (err, results) {
-          if (err)  {
-            console.error("Error dectected: ", err);
-          }
-          console.table(results);
-        });
-        break;
-      
-
-
+    //when a user selects "View All Departments", call viewDepartments method.
+    case "View All Departments":
+      const departments = await viewDepartments();
+      console.table(departments[0]);
+      break;
   }
 };
 //init function to start the app
 const init = () => {
-    //add figfont of "Employee Management" in the beginning
+  //add figfont of "Employee Management" in the beginning
   figlet("Employee Management", function (err, data) {
     if (err) {
       console.error("Something went wrong..." + err);

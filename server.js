@@ -201,7 +201,7 @@ const addRole = async() => {
       name: 'role'
     },
     {
-      type: 'number',
+      type: 'input',
       message: "What is the salary of the role?",
       name: 'salary'
     },
@@ -220,7 +220,7 @@ const addRole = async() => {
   const sql_AR = `INSERT INTO role (title, salary, department_id)
   VALUES (?,?,?)`;
   try {
-    await db.promise().query(sql_AR, [roleInfo.role, roleInfo.salary, dep_id]); 
+    await db.promise().query(sql_AR, [roleInfo.role, Number(roleInfo.salary), dep_id]); 
     console.log(`Added ${roleInfo.role} to the database`);
  } catch (err)  {
   console.error("Error Detected: ", err);
@@ -287,19 +287,24 @@ const promptUser = async () => {
       console.table(departments[0]);
       break;
     case "Add Employee": 
-      addEmployee();
+      await addEmployee();
       break;
     case "Update Employee Role":
-      updateRole();
+      await updateRole();
       break;
     case "Add Role":
-      addRole();
+      await addRole();
       break;
     case "Add Department":
-      addDepartment();
+      await addDepartment();
       break;
-    
+    //if a user selects "Quit", exit out of the program.
+    case "Quit":
+      console.log("Exiting the program.");
+      process.exit(0);
   }
+  //call promptUser() again for the next iteration.
+  await promptUser();
 };
 //init function to start the app
 const init = () => {

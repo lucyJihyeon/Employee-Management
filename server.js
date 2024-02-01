@@ -58,6 +58,86 @@ LEFT JOIN employee AS m ON e.manager_id = m.id`;
   };
 };
 
+//method to view all of the employees' full names
+const viewFullname = async () => {
+  const sql_fullName = `SELECT id, CONCAT(first_name, " ", last_name) AS full_name
+FROM employee`;
+  try {
+    // fetch the names and store them in an array named fullNames
+    const [fullNames] = await db.promise().query(sql_fullName);
+    return [fullNames];
+  }catch (err) {
+    console.error("Error Detected: ", err);
+    return [];
+  };
+};
+//method to add an employee to the database 
+const addEmployee = async () => {
+  let rolesArray = [];
+  //store the roles
+  let roles = await viewRoles();
+  roles[0].forEach(role => {
+    rolesArray.push(role.title);
+  });
+  //store the employee' full names
+  let managerArray = ["None"];
+  let fullName = await viewFullname();
+  fullName[0].forEach(name => {
+    managerArray.push(name.full_name);
+  });
+
+  //prompt the user to retrieve the necessary data about the new employee
+  const employeeInfo = await inquirer.prompt([
+    {
+      type: "input",
+      message: "What is the employee's first name?",
+      name: 'first_name'
+    },
+    {
+      type: "input",
+      message: "What is the employee's last name?",
+      name: "last_name"
+    },
+    {
+      type: "list",
+      message: "What is the employee's role?",
+      choices: rolesArray,
+      name: "role"
+    },
+    {
+      type: "list",
+      message: "Who is the employee's manager?",
+      choices: managerArray,
+      name: "manager"
+    }
+   ]);
+   //from the roles objects array, find the one that matches the employeeInfo.role(user prompt)
+   const selectedRole = roles[0].find(role => role.title === employeeInfo.role);
+   if (!selectedRole) {
+    console.error("Error: Role not found");
+    return;
+   }
+   //the matching object's id is the role id.
+   const role_id = selectedRole.id;
+
+   //if an user selected "None", set up as null
+   let manager_id = null;
+   //if an user selected a manager and it matches the employee's full name, return the matching object
+   if (employeeInfo.manager !== "None") {
+    const selectedManager = fullName[0].find(name => name.full_name === employeeInfo.manager);
+    manager_id = selectedManager.id;
+   };
+   //use query method to add the new employee 
+   const sql_NewEmployee = `INSERT INTO employee (first_name, last_name, manager_id, role_id)
+VALUES(?, ?, ?, ?)`;
+   try {
+      await db.promise().query(sql_NewEmployee, [employeeInfo.first_name, employeeInfo.last_name, manager_id, role_id]); 
+      console.log(`Added ${employeeInfo.first_name} ${employeeInfo.last_name} to the database`);
+   } catch (err)  {
+    console.error("Error Detected: ", err);
+   };
+};
+
 //function to start prompting a user what action they want to take
 const promptUser = async () => {
   //store the answer from the user prompt
@@ -78,7 +158,7 @@ const promptUser = async () => {
       name: "action",
     },
   ]);
-  let query = "";
+
   //switch statement to display different database table based on the user action
   switch (answer.action) {
     //when a user selects "View All Employees", call viewEmployees method 
@@ -96,6 +176,8 @@ const promptUser = async () => {
       const departments = await viewDepartments();
       console.table(departments[0]);
       break;
+    case "Add Employee": 
+      addEmployee();
   }
 };
 //init function to start the app

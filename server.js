@@ -186,6 +186,47 @@ VALUES(?, ?, ?, ?)`;
    };
 };
 
+//function to add a role to the database
+const addRole = async() => {
+  //retrieve all the department objects from the veiwDepartments function
+  let departmentArray = [];
+  let departments = await viewDepartments();
+  departments[0].forEach(dep => {
+    departmentArray.push(dep.name);
+  });
+  let roleInfo = await inquirer.prompt([
+    {
+      type: 'input',
+      message: "What is the name of the role?",
+      name: 'role'
+    },
+    {
+      type: 'number',
+      message: "What is the salary of the role?",
+      name: 'salary'
+    },
+    {
+      type: 'list',
+      message: "Which department does the role belong to?",
+      choices: departmentArray,
+      name: 'department'
+    }
+  ]);
+  //find the department record that matches the department name and gather the associated id of it
+  const selectedDep = departments[0].find(dep => dep.name === roleInfo.department);
+  const dep_id = selectedDep.id;
+
+  //add the role record with the roleInfo data
+  const sql_AR = `INSERT INTO role (title, salary, department_id)
+  VALUES (?,?,?)`;
+  try {
+    await db.promise().query(sql_AR, [roleInfo.role, roleInfo.salary, dep_id]); 
+    console.log(`Added ${roleInfo.role} to the database`);
+ } catch (err)  {
+  console.error("Error Detected: ", err);
+ };
+}
+
 //function to start prompting a user what action they want to take
 const promptUser = async () => {
   //store the answer from the user prompt
@@ -229,6 +270,11 @@ const promptUser = async () => {
       break;
     case "Update Employee Role":
       updateRole();
+      break;
+    case "Add Role":
+      addRole();
+      break;
+    
   }
 };
 //init function to start the app

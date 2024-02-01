@@ -54,7 +54,7 @@ LEFT JOIN employee AS m ON e.manager_id = m.id`;
       break;
     //when a user selects "View All Roles", update the query 
     case "View All Roles":
-      query = `SELECT r.id AS id, r.title, d.name AS department, r.salary AS salary
+      query = `SELECT r.id AS id, r.title, d.name AS department, r.salary
 FROM role AS r
 JOIN department AS d ON r.department_id = d.id`;
       //execute the query and fetch the results
@@ -65,6 +65,20 @@ JOIN department AS d ON r.department_id = d.id`;
         console.table(results);
       });
       break;
+      //when a user selects "View All Departments", update the query 
+      case "View All Departments":
+        query = `SELECT * FROM department`;
+        //execute the query and fetch the results
+        db.query(query, function (err, results) {
+          if (err)  {
+            console.error("Error dectected: ", err);
+          }
+          console.table(results);
+        });
+        break;
+      
+
+
   }
 };
 //init function to start the app

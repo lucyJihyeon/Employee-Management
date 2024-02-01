@@ -194,7 +194,7 @@ const addRole = async() => {
   departments[0].forEach(dep => {
     departmentArray.push(dep.name);
   });
-  let roleInfo = await inquirer.prompt([
+  const roleInfo = await inquirer.prompt([
     {
       type: 'input',
       message: "What is the name of the role?",
@@ -222,6 +222,27 @@ const addRole = async() => {
   try {
     await db.promise().query(sql_AR, [roleInfo.role, roleInfo.salary, dep_id]); 
     console.log(`Added ${roleInfo.role} to the database`);
+ } catch (err)  {
+  console.error("Error Detected: ", err);
+ };
+};
+
+//method to add a new department to the database
+const addDepartment = async () => {
+  //prompt the user to enter the name of the department
+  const newDep = await inquirer.prompt([
+    {
+      type: 'input',
+      message: "What is the name of the department?",
+      name: "name"
+    }
+  ]);
+  //add a new record to the department table with the value of the new department name
+  const sql_AD = `INSERT INTO department (name)
+VALUES (?)`;
+  try {
+    await db.promise().query(sql_AD, [newDep.name]); 
+    console.log(`Added ${newDep.name} to the database`);
  } catch (err)  {
   console.error("Error Detected: ", err);
  };
@@ -273,6 +294,9 @@ const promptUser = async () => {
       break;
     case "Add Role":
       addRole();
+      break;
+    case "Add Department":
+      addDepartment();
       break;
     
   }

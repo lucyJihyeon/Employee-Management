@@ -3,13 +3,14 @@ const figlet = require("figlet");
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
 const { table } = require("cli-table");
+require('dotenv').config();
 
 //create connection between the database
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "Azsx340302@",
-  database: "employees_db",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 });
 
 //method to view all the departments
@@ -65,7 +66,7 @@ const updateRole = async () => {
       message: "Which role do you want to assign the selected employee?",
       choices: rolesArray,
       name: "role"
-    }
+    },
   ]);
   const sql_RU = `UPDATE employee
 SET role_id = ?

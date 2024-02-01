@@ -41,6 +41,53 @@ const viewRoles = async () => {
   };
 };
 
+const updateRole = async () => {
+  const eeNames = [];
+  let fullName = await viewFullname();
+  fullName[0].forEach(name => {
+    eeNames.push(name.full_name);
+  });
+  let rolesArray = [];
+  //store the roles
+  let roles = await viewRoles();
+  roles[0].forEach(role => {
+    rolesArray.push(role.title);
+  });
+  const eeUpdates = await inquirer.prompt([
+    {
+      type: 'list',
+      message: "Which employee's role do you want to update?",
+      choices: eeNames,
+      name: "name"
+    },
+    {
+      type: 'list',
+      message: "Which role do you want to assign the selected employee?",
+      choices: rolesArray,
+      name: "role"
+    }
+  ]);
+  const sql_RU = `UPDATE employee
+SET role_id = ?
+WHERE id = ?`;
+//from the roles objects array, find the one that matches the employeeInfo.role(user prompt)
+const selectedRole = roles[0].find(role => role.title === eeUpdates.role);
+//the matching object's id is the role id.
+const role_id = selectedRole.id;
+if (!selectedRole) {
+  console.error('Error: Role not found');
+  return;
+}
+const selectedEE = fullName[0].find(name => name.full_name === eeUpdates.name);
+const ee_id = selectedEE.id;
+try {
+  await db.promise().query(sql_RU, [role_id, ee_id]); 
+  console.log(`Updated ${eeUpdates.name}'s role successfully updated.`);
+} catch (err)  {
+console.error("Error Detected: ", err);
+};
+}
+
 //method to view all the employees 
 const viewEmployees = async () => {
   const query_VE = 
@@ -71,6 +118,7 @@ FROM employee`;
     return [];
   };
 };
+
 //method to add an employee to the database 
 const addEmployee = async () => {
   let rolesArray = [];
@@ -178,6 +226,9 @@ const promptUser = async () => {
       break;
     case "Add Employee": 
       addEmployee();
+      break;
+    case "Update Employee Role":
+      updateRole();
   }
 };
 //init function to start the app
